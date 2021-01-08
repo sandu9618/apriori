@@ -1,6 +1,7 @@
 import numpy as np
 from ipaddress import ip_address, ip_network
 import re
+import define
 
 
 def is_valid_ipv4(ip):
@@ -88,11 +89,11 @@ def isPrivate(IP: str) -> bool:
 def check_ip(ip: str) -> str:
     if is_valid_ip(ip):
         if isPrivate(ip):
-            return "PRIVATE"
+            return define.R_PRIVATE
         else:
-            return "PUBLIC"
+            return define.R_PUBLIC
     else:
-        return "NON"
+        return define.R_NON
 
 
 def check_direction(ip: str, cidrs: list) -> str:
@@ -102,18 +103,18 @@ def check_direction(ip: str, cidrs: list) -> str:
             if ip_address(ip) in ip_network(cidr):
                 count = count + 1
         if count > 1:
-            return "IN"
+            return define.X_IN
         else:
-            return "OUT"
+            return define.X_OUT
     else:
-        return "NON"
+        return define.X_NON
 
 
 def preProcessing(dataSet):
     length_max = dataSet['Length'].max()
     length_min = dataSet['Length'].min()
 
-    cidr = ["11.0.0.0/24"]
+    cidr = define.CIDR
 
     # print(length_max)
     dataSet['Length'] = np.where(np.logical_or(dataSet.Length < 100, dataSet.Length == 100), 0, dataSet.Length)
@@ -141,8 +142,6 @@ def preProcessing(dataSet):
     dataSet['Length'] = 'l-' + dataSet['Length']
     dataSet['Dst_port'] = 'd-' + dataSet['Dst_port']
     dataSet['Class'] = 'c-' + dataSet['Class']
-    dataSet['Dst_ip_range'] = 'r-' + dataSet['Dst_ip_range']
-    dataSet['Direction'] = 'x-' + dataSet['Direction']
 
     return dataSet
 
@@ -233,7 +232,7 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
         confAB = supportData[freqSet] / supportData[freqSet - conseq]  # calc
         confBA = supportData[freqSet] / supportData[conseq]
         lift = supportData[freqSet] / supportData[freqSet - conseq] * supportData[conseq]
-        if (confAB >= minConf) and (conseq in [frozenset({'c-A1'}), frozenset({'c-A2'}), frozenset({'c-A3'})]):
+        if (confAB >= minConf) and (conseq in [frozenset({define.C_A1}), frozenset({define.C_A2}), frozenset({define.C_A3})]):
             print(freqSet - conseq, '-->', conseq, 'confAB:', confAB, 'confBA:', confBA, 'supportAB:',
                   supportData[freqSet], 'supportA:', supportData[freqSet - conseq], 'supportB:', supportData[conseq],
                   'lift:', lift)
@@ -264,8 +263,8 @@ def oneHot(dataSet, featureList):
     r, c = dataSet.shape
     zeroArray = np.zeros(shape=(r, len(featureList)))
     for index, row in dataSet.iterrows():
-        ItemA = row['ItemA']
-        ItemB = row['ItemB']
+        ItemA = row[define.ITEM_A]
+        ItemB = row[define.ITEM_B]
 
         for item in ItemA:
             if item in featureList:
