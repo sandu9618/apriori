@@ -1,7 +1,11 @@
 DATA_FILE_PATH = 'Data/data_final_1_5.csv'
-FREQ_ITEMS_FILE_PATH = 'output/freqItems'
+FREQ_ITEMS_FILE_PATH = 'output/freqItems.npy'
 SUPP_DATA_FILE_PATH = 'output/suppData'
 FINAL_RULES_FILE_PATH = 'output/output_1_5.csv'
+C1_FILE_PATH = 'output/c1.npy'
+L1_FILE_PATH = 'output/L1.npy'
+D_FILE_PATH = 'output/D.npy'
+SUPP_0_PATH = 'output/supp0.npy'
 
 # Columns of final rules dataset
 

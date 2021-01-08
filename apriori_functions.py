@@ -1,7 +1,7 @@
 import numpy as np
 from ipaddress import ip_address, ip_network
 import re
-import define
+import define_
 
 
 def is_valid_ipv4(ip):
@@ -89,11 +89,11 @@ def isPrivate(IP: str) -> bool:
 def check_ip(ip: str) -> str:
     if is_valid_ip(ip):
         if isPrivate(ip):
-            return define.R_PRIVATE
+            return define_.R_PRIVATE
         else:
-            return define.R_PUBLIC
+            return define_.R_PUBLIC
     else:
-        return define.R_NON
+        return define_.R_NON
 
 
 def check_direction(ip: str, cidrs: list) -> str:
@@ -103,18 +103,18 @@ def check_direction(ip: str, cidrs: list) -> str:
             if ip_address(ip) in ip_network(cidr):
                 count = count + 1
         if count > 1:
-            return define.X_IN
+            return define_.X_IN
         else:
-            return define.X_OUT
+            return define_.X_OUT
     else:
-        return define.X_NON
+        return define_.X_NON
 
 
 def preProcessing(dataSet):
     length_max = dataSet['Length'].max()
     length_min = dataSet['Length'].min()
 
-    cidr = define.CIDR
+    cidr = define_.CIDR
 
     # print(length_max)
     dataSet['Length'] = np.where(np.logical_or(dataSet.Length < 100, dataSet.Length == 100), 0, dataSet.Length)
@@ -159,7 +159,7 @@ def createC1(dataSet):
     # can use it as a key in a dict
 
 
-def scanD(D, Ck, minSupport):
+def scanD(D, Ck, minSupport):  # generates L and dictionary of support data
     ssCnt = {}
     for tid in D:
         for can in Ck:
@@ -184,9 +184,9 @@ def aprioriGen(Lk, k):  # creates Ck
     lenLk = len(Lk)
     for i in range(lenLk):
         for j in range(i + 1, lenLk):
-            L1 = list(Lk[i])[:k - 2];
+            L1 = list(Lk[i])[:k - 2]
             L2 = list(Lk[j])[:k - 2]
-            L1.sort();
+            L1.sort()
             L2.sort()
             if L1 == L2:  # if first k-2 elements are equal
                 retList.append(Lk[i] | Lk[j])  # set union
@@ -203,7 +203,7 @@ def apriori(dataSet, minSupport=0.1):
     L = [L1]
     k = 2
     while len(L[k - 2]) > 0:
-        Ck = aprioriGen(L[k - 2], k)  # To produce kth candidate itemset
+        Ck = aprioriGen(L[k - 2], k)  # To produce candidate itemset of size k
         Lk, supK = scanD(D, Ck, minSupport)  # scan DB to get Lk
         supportData.update(supK)
         L.append(Lk)
@@ -232,7 +232,8 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
         confAB = supportData[freqSet] / supportData[freqSet - conseq]  # calc
         confBA = supportData[freqSet] / supportData[conseq]
         lift = supportData[freqSet] / supportData[freqSet - conseq] * supportData[conseq]
-        if (confAB >= minConf) and (conseq in [frozenset({define.C_A1}), frozenset({define.C_A2}), frozenset({define.C_A3})]):
+        if (confAB >= minConf) and (
+                conseq in [frozenset({define_.C_A1}), frozenset({define_.C_A2}), frozenset({define_.C_A3})]):
             print(freqSet - conseq, '-->', conseq, 'confAB:', confAB, 'confBA:', confBA, 'supportAB:',
                   supportData[freqSet], 'supportA:', supportData[freqSet - conseq], 'supportB:', supportData[conseq],
                   'lift:', lift)
@@ -263,8 +264,8 @@ def oneHot(dataSet, featureList):
     r, c = dataSet.shape
     zeroArray = np.zeros(shape=(r, len(featureList)))
     for index, row in dataSet.iterrows():
-        ItemA = row[define.ITEM_A]
-        ItemB = row[define.ITEM_B]
+        ItemA = row[define_.ITEM_A]
+        ItemB = row[define_.ITEM_B]
 
         for item in ItemA:
             if item in featureList:
