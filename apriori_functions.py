@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from ipaddress import ip_address, ip_network
 import re
 import define_
@@ -277,3 +278,59 @@ def oneHot(dataSet, featureList):
             zeroArray[index][indexB] = 1
 
     return zeroArray
+
+
+def freqItemToDF(freq):
+    freqArr = []
+    for i in range(len(freq) - 1):
+        len_ = len(freq[i])
+        for j in range(len_):
+            arr = np.array(['*     ', '*     ', '*     ', '*         ', '*       ', '*      '])
+            item = list(freq[i][j])
+            for k in range(len(item)):
+                kItem = item[k]
+                if 'p-' in kItem:
+                    arr[0] = kItem
+                elif 'l-' in kItem:
+                    arr[1] = kItem
+                elif 'd-' in kItem:
+                    arr[2] = kItem
+                elif 'r-' in kItem:
+                    arr[3] = kItem
+                elif 'x-' in kItem:
+                    arr[4] = kItem
+                elif 'c-' in kItem:
+                    arr[5] = kItem
+            freqArr.append(arr)
+
+    colmn = ["Protocol", "Length", "Dst-port", "Dst-ip-range", "Direction", "Class"]
+    freqDF = pd.DataFrame(freqArr, columns=colmn)
+
+    return freqDF
+
+
+def frozenSetToSetForm(froz):
+    arr1 = []
+    for i in range(len(froz) - 1):
+        arr = []
+        len_ = len(froz[i])
+        for j in range(len_):
+            arr.append(set(list(froz[i][j])))
+        arr1.append(arr)
+
+    return arr1
+
+
+def findMFI(freqItems):
+    arr = frozenSetToSetForm(freqItems)
+    mfi = []
+    for i in range(len(freqItems) - 1):
+        for j in range(len(freqItems[i])):
+            count = 0
+            for k in range(len(freqItems[i + 1])):
+                if arr[i + 1][k].issuperset(arr[i][j]):
+                    count = count + 1
+            if count == 0:
+                mfi.append(arr[i][j])
+
+    return mfi
