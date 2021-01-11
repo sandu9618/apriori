@@ -39,3 +39,5 @@ class FIM(object):
                        define_.R_PUBLIC, define_.R_PRIVATE, define_.R_NON, define_.X_IN, define_.X_OUT, define_.X_NON,
                        define_.C_A1, define_.C_A2, define_.C_A3]
         return pd.DataFrame(apriori_functions.oneHot(self.finalRules, featureList), columns=featureList)
+
+def main():

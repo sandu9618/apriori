@@ -118,9 +118,9 @@ def preProcessing(dataSet):
     cidr = define_.CIDR
 
     # print(length_max)
-    dataSet['Length'] = np.where(np.logical_or(dataSet.Length < 100, dataSet.Length == 100), 0, dataSet.Length)
-    dataSet['Length'] = np.where(np.logical_and(dataSet.Length > 100, dataSet.Length < 200), 1, dataSet.Length)
-    dataSet['Length'] = np.where(np.logical_or(dataSet.Length > 200, dataSet.Length == 200), 2, dataSet.Length)
+    dataSet['Length'] = np.where(np.logical_or(dataSet.Length < 60, dataSet.Length == 60), 0, dataSet.Length)
+    dataSet['Length'] = np.where(np.logical_and(dataSet.Length > 60, dataSet.Length < 1000), 1, dataSet.Length)
+    dataSet['Length'] = np.where(np.logical_or(dataSet.Length > 1000, dataSet.Length == 1000), 2, dataSet.Length)
 
     dataSet = dataSet[dataSet['Destination'].notnull()]
 
@@ -138,6 +138,7 @@ def preProcessing(dataSet):
     dataSet['Dst_port'] = dataSet['Dst_port'].astype('str')
     dataSet['Class'] = dataSet['Class'].astype('str')
     dataSet['Protocol'] = dataSet['Protocol'].astype('str')
+    # dataSet['Destination'] = dataSet['Destination'].astype('str')
 
     dataSet['Protocol'] = 'p-' + dataSet['Protocol']
     dataSet['Length'] = 'l-' + dataSet['Length']
