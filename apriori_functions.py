@@ -6,7 +6,8 @@ import define_
 
 
 def is_valid_ipv4(ip):
-    """Validates IPv4 addresses.
+    """
+    Validates IPv4 addresses.
     """
     pattern = re.compile(r"""
         ^
@@ -46,7 +47,8 @@ def is_valid_ipv4(ip):
 
 
 def is_valid_ipv6(ip):
-    """Validates IPv6 addresses.
+    """
+    Validates IPv6 addresses.
     """
     pattern = re.compile(r"""
         ^
@@ -78,7 +80,8 @@ def is_valid_ipv6(ip):
 
 
 def is_valid_ip(ip):
-    """Validates IP addresses.
+    """
+    Validates IP addresses.
     """
     return is_valid_ipv4(ip) or is_valid_ipv6(ip)
 
@@ -98,6 +101,12 @@ def check_ip(ip: str) -> str:
 
 
 def check_direction(ip: str, cidrs: list) -> str:
+    """
+    Get the direction of a ip address (In or OUT)
+    :param ip: The relevant IP address
+    :param cidrs: The range of the IP address
+    :return:
+    """
     if is_valid_ip(ip):
         count = 0
         for cidr in cidrs:
@@ -112,6 +121,13 @@ def check_direction(ip: str, cidrs: list) -> str:
 
 
 def preProcessing(dataSet):
+    """
+    small: length < 60 -> Control packets
+    medium: 60 < length <1000 -> Other packets
+    large: length > 1000 -> file downloading packets
+    :param dataSet: Anomaly filtered data set
+    :return:
+    """
     length_max = dataSet['Length'].max()
     length_min = dataSet['Length'].min()
 
@@ -148,7 +164,16 @@ def preProcessing(dataSet):
     return dataSet
 
 
+"""First create candidate itemsets of size one using the whole dataset. Then find L1 and candidate itemset of size 
+two is created using L1. Like wise to create the candidate itemset of size k the set Lk+1 is used. """
+
+
 def createC1(dataSet):
+    """
+    generates candidate itemset of size one
+    :param dataSet: preprocessed dataset
+    :return:
+    """
     C1 = []
     for transaction in dataSet:
         for item in transaction:
@@ -161,7 +186,14 @@ def createC1(dataSet):
     # can use it as a key in a dict
 
 
-def scanD(D, Ck, minSupport):  # generates L and dictionary of support data
+def scanD(D, Ck, minSupport):
+    """
+    generates L and dictionary of support data
+    :param D: set form of dataset
+    :param Ck: kth candidate itemset
+    :param minSupport: minimum support
+    :return:
+    """
     ssCnt = {}
     for tid in D:
         for can in Ck:
@@ -174,7 +206,14 @@ def scanD(D, Ck, minSupport):  # generates L and dictionary of support data
     retList = []
     supportData = {}
     for key in ssCnt:
-        support = ssCnt[key] / numItems
+        '''
+        W/ percentage value: support = num-current-items / num-total-items
+            Then: minimum support (float value) is used for condition (theta)
+        W/O percentage value: support = num-current-items
+            Then: minimum support count is used for condition (theta * n)
+        '''
+        support = ssCnt[key] / numItems  # For percentage value
+        # support = ssCnt[key]  # For count
         if support >= minSupport:
             retList.insert(0, key)
         supportData[key] = support
@@ -182,6 +221,12 @@ def scanD(D, Ck, minSupport):  # generates L and dictionary of support data
 
 
 def aprioriGen(Lk, k):  # creates Ck
+    """
+    Generate candidate itemsets
+    :param Lk: candidate itemset of size k that do meet the minimum requirement
+    :param k: size of candidate itemset
+    :return:
+    """
     retList = []
     lenLk = len(Lk)
     for i in range(lenLk):
@@ -196,6 +241,12 @@ def aprioriGen(Lk, k):  # creates Ck
 
 
 def apriori(dataSet, minSupport=0.1):
+    """
+    Generate the frequent itemsets
+    :param dataSet: preprocessed dataset
+    :param minSupport:
+    :return:
+    """
     C1 = createC1(dataSet)  # Create candidate itemsets of size one
     D = list(map(set, dataSet))  # make dataset in the setform
     L1, supportData = scanD(D, C1, minSupport)
@@ -213,7 +264,14 @@ def apriori(dataSet, minSupport=0.1):
     return L, supportData
 
 
-def generateRules(L, supportData, minConf=0.7):  # supportData is a dict coming from scanD
+def generateRules(L, supportData, minConf=0.7):
+    """
+    Generate rules with the confidence greater than the minimum confidence
+    :param L: Frequent itemset list
+    :param supportData: A dict coming from scanD
+    :param minConf:
+    :return:
+    """
     # freqt = freq(L)
     # print(pd.Series( (v[0] for v in L) ))
     bigRuleList = []
@@ -228,6 +286,15 @@ def generateRules(L, supportData, minConf=0.7):  # supportData is a dict coming 
 
 
 def calcConf(freqSet, H, supportData, brl, minConf=0.7):
+    """
+    Calculates the confidence of the pattern
+    :param freqSet:
+    :param H:
+    :param supportData:
+    :param brl:
+    :param minConf:
+    :return:
+    """
     prunedH = []  # create new list to return
     list_item = []
     for conseq in H:
@@ -235,7 +302,7 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
         confBA = supportData[freqSet] / supportData[conseq]
         lift = supportData[freqSet] / supportData[freqSet - conseq] * supportData[conseq]
         if (confAB >= minConf) and (
-                conseq in [frozenset({define_.C_A1}), frozenset({define_.C_A2}), frozenset({define_.C_A3})]):
+                freqSet - conseq in [frozenset({define_.C_A1}), frozenset({define_.C_A2}), frozenset({define_.C_A3})]):
             print(freqSet - conseq, '-->', conseq, 'confAB:', confAB, 'confBA:', confBA, 'supportAB:',
                   supportData[freqSet], 'supportA:', supportData[freqSet - conseq], 'supportB:', supportData[conseq],
                   'lift:', lift)
@@ -246,6 +313,15 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
 
 
 def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
+    """
+
+    :param freqSet:
+    :param H:
+    :param supportData:
+    :param brl:
+    :param minConf:
+    :return:
+    """
     m = len(H[0])
     if len(freqSet) > (m + 1):  # try further merging
         Hmp1 = aprioriGen(H, m + 1)  # create Hm+1 new candidates
@@ -255,6 +331,11 @@ def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
 
 
 def convertToStringList(string):
+    """
+    Converts the string of the dataframe into list of strings
+    :param string:
+    :return:
+    """
     a = string.replace('\'', '')
     b = a.replace('[', '')
     c = b.replace(']', '')
@@ -263,6 +344,12 @@ def convertToStringList(string):
 
 
 def oneHot(dataSet, featureList):
+    """
+    Convert antecedents and  consequents into one hot format
+    :param dataSet:
+    :param featureList:
+    :return:
+    """
     r, c = dataSet.shape
     zeroArray = np.zeros(shape=(r, len(featureList)))
     for index, row in dataSet.iterrows():
@@ -282,6 +369,11 @@ def oneHot(dataSet, featureList):
 
 
 def freqItemToDF(freq):
+    """
+    Get frequent itemsets to a dataframe
+    :param freq: List of frequent itemsets
+    :return:
+    """
     freqArr = []
     for i in range(len(freq) - 1):
         len_ = len(freq[i])
@@ -311,6 +403,11 @@ def freqItemToDF(freq):
 
 
 def frozenSetToSetForm(froz):
+    """
+    Convert frozen set into a set form
+    :param froz:
+    :return:
+    """
     arr1 = []
     for i in range(len(froz) - 1):
         arr = []
@@ -323,6 +420,11 @@ def frozenSetToSetForm(froz):
 
 
 def findMFI(freqItems):
+    """
+    Finding maximal frequent itemsets
+    :param freqItems: Mined frequent itemsets
+    :return:
+    """
     arr = frozenSetToSetForm(freqItems)
     mfi = []
     for i in range(len(freqItems) - 1):
