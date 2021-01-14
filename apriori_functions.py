@@ -354,16 +354,16 @@ def oneHot(dataSet, featureList):
     zeroArray = np.zeros(shape=(r, len(featureList)))
     for index, row in dataSet.iterrows():
         ItemA = row[define_.ITEM_A]
-        ItemB = row[define_.ITEM_B]
+        # ItemB = row[define_.ITEM_B]
 
         for item in ItemA:
             if item in featureList:
                 indexA = featureList.index(item)
                 zeroArray[index][indexA] = 1
 
-        if ItemB[0] in featureList:
-            indexB = featureList.index(ItemB[0])
-            zeroArray[index][indexB] = 1
+        # if ItemB[0] in featureList:
+        #     indexB = featureList.index(ItemB[0])
+        #     zeroArray[index][indexB] = 1
 
     return zeroArray
 
