@@ -187,6 +187,7 @@ def createC1(dataSet):
 
 
 def scanD(D, Ck, minSupport):
+    print("++++++++++++++++++++++++++++++++++++++++++")
     """
     generates L and dictionary of support data
     :param D: set form of dataset
@@ -202,6 +203,7 @@ def scanD(D, Ck, minSupport):
                     ssCnt[can] = 1
                 else:
                     ssCnt[can] += 1
+    print("=======================================")
     numItems = float(len(D))
     retList = []
     supportData = {}
@@ -212,8 +214,8 @@ def scanD(D, Ck, minSupport):
         W/O percentage value: support = num-current-items
             Then: minimum support count is used for condition (theta * n)
         '''
-        support = ssCnt[key] / numItems  # For percentage value
-        # support = ssCnt[key]  # For count
+        # support = ssCnt[key] / numItems  # For percentage value
+        support = ssCnt[key]  # For count
         if support >= minSupport:
             retList.insert(0, key)
         supportData[key] = support
