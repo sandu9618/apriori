@@ -1,4 +1,4 @@
-DATA_FILE_PATH = 'Data/data_final_1_5.csv'
+DATA_FILE_PATH = 'Data/data_final_1_4.csv'
 FREQ_ITEMS_FILE_PATH = 'output/freqItems.csv'
 FREQ_ITEM_FORMATTED_FILE_PATH = '/output/freqItems_formatted.csv'
 SUPP_DATA_FILE_PATH = 'output/suppData'

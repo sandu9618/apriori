@@ -304,7 +304,7 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
         confBA = supportData[freqSet] / supportData[conseq]
         lift = supportData[freqSet] / supportData[freqSet - conseq] * supportData[conseq]
         if (confAB >= minConf) and (
-                freqSet - conseq in [frozenset({define_.C_A1}), frozenset({define_.C_A2}), frozenset({define_.C_A3})]):
+                conseq in [frozenset({define_.C_A1}), frozenset({define_.C_A2}), frozenset({define_.C_A3})]):
             print(freqSet - conseq, '-->', conseq, 'confAB:', confAB, 'confBA:', confBA, 'supportAB:',
                   supportData[freqSet], 'supportA:', supportData[freqSet - conseq], 'supportB:', supportData[conseq],
                   'lift:', lift)
